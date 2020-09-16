@@ -1,0 +1,27 @@
+ @RequestMapping("addversionsave")
+    public String addversionsave(AppVersion version, MultipartFile a_downloadLink, HttpServletRequest request) {
+        //上传文件
+        String realPath = request.getServletContext().getRealPath("statics/uploadfiles/");
+        String originalFilename = a_downloadLink.getOriginalFilename();
+        //获取后缀
+        String prefix = FilenameUtils.getExtension(originalFilename);
+        //生成文件名
+        String fileName = System.currentTimeMillis() + RandomUtils.nextInt(1000000000) + "." + prefix;
+
+        File file = new File(realPath, fileName);
+        try {
+            a_downloadLink.transferTo(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        version.setDownloadlink("/statics/uploadfiles/" + fileName);
+        version.setCreatedby((long) 1);
+        version.setCreationdate(new Date());
+        version.setApkfilename(fileName);
+        version.setApklocpath(realPath + fileName);
+        System.out.println(version);
+        Long versionid = version.getId();
+        Long appid = version.getAppid();
+        appVersionService.insert(version);
+        return "redirect:/dev/flatform/appst";
+    }
